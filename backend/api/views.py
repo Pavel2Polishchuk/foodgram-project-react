@@ -10,8 +10,8 @@ from rest_framework.permissions import SAFE_METHODS, IsAuthenticated
 from rest_framework.response import Response
 from rest_framework.status import HTTP_400_BAD_REQUEST
 from rest_framework.viewsets import ModelViewSet, ReadOnlyModelViewSet
-from recipes.models import (Favorite, Ingredient, IngredientInRecipe, Recipe,
-                            ShoppingCart, Tag)
+from recipes.models import (Favorite, Ingredient, IngredientInRecipe,
+                            Recipe, ShoppingCart, Tag)
 
 from .filters import IngredientFilter, RecipeFilter
 from .pagination import CustomPagination
