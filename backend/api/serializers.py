@@ -6,7 +6,6 @@ from rest_framework.exceptions import ValidationError
 from rest_framework.fields import IntegerField, SerializerMethodField
 from rest_framework.relations import PrimaryKeyRelatedField
 from rest_framework.serializers import ModelSerializer, ReadOnlyField
-
 from recipes.models import Ingredient, IngredientInRecipe, Recipe, Tag
 from users.models import Subscribe, User
 
