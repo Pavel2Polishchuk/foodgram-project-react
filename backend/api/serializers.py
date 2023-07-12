@@ -6,7 +6,7 @@ from rest_framework.exceptions import ValidationError
 from rest_framework.fields import IntegerField, SerializerMethodField
 from rest_framework.relations import PrimaryKeyRelatedField
 from rest_framework.serializers import ModelSerializer, ReadOnlyField
-from recipes.models import IngredientInRecipe, Ingredient, Recipe, Tag
+from recipes.models import Ingredient, IngredientInRecipe, Recipe, Tag
 from users.models import Subscribe, User
 
 
@@ -110,12 +110,10 @@ class IngredientInRecipeWriteSerializer(ModelSerializer):
         fields = ('id', 'amount', 'name', 'measurement_unit')
 
     def get_measurement_unit(self, ingredient):
-        measurement_unit = ingredient.ingredient.measurement_unit
-        return measurement_unit
+        return ingredient.ingredient.measurement_unit
 
     def get_name(self, ingredient):
-        name = ingredient.ingredient.name
-        return name
+        return ingredient.ingredient.name
 
 
 class IngredientInRecipeSerializer(ModelSerializer):
