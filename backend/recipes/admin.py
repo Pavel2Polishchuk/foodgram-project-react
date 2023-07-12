@@ -1,6 +1,6 @@
-from django.contrib import admin
 from recipes.models import (Favorite, Ingredient, IngredientInRecipe,
                             Recipe, Tag, ShoppingCart)
+from django.contrib import admin
 
 
 class BaseAdminSettings(admin.ModelAdmin):
