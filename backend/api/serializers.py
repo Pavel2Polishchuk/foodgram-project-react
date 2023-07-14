@@ -1,5 +1,4 @@
 from django.core.exceptions import BadRequest
-from django.shortcuts import get_object_or_404
 from djoser.serializers import UserCreateSerializer, UserSerializer
 from drf_extra_fields.fields import Base64ImageField
 from recipes.models import Ingredient, IngredientInRecipe, Recipe, Tag
@@ -10,9 +9,9 @@ from rest_framework.fields import SerializerMethodField
 from rest_framework.relations import PrimaryKeyRelatedField
 from rest_framework.serializers import ModelSerializer, ReadOnlyField
 from users.models import Subscribe, User
-#По поводу сортировки: изначально разбил сортировку на группы,
-#но автоматические тесты на практикуме не проходит,
-#работает только в таком виде, по алфавиту
+# По поводу сортировки: изначально разбил сортировку на группы,
+# но автоматические тесты на практикуме не проходит,
+# работает только в таком виде, по алфавиту
 
 
 class TagSerializer(ModelSerializer):
@@ -103,10 +102,10 @@ class SubscribeSerializer(CustomUserSerializer):
 
 
 class IngredientInRecipeWriteSerializer(ModelSerializer):
-    id = PrimaryKeyRelatedField(IngredientInRecipe, many=True,read_only=True)
-    name = serializers.SlugRelatedField(IngredientInRecipe,
+    id = PrimaryKeyRelatedField(IngredientInRecipe, many=True, read_only=True)
+    name = serializers.SlugRelatedField(IngredientInRecipe, 
                                         many=True,read_only=True)
-    measurement_unit = serializers.SlugRelatedField(IngredientInRecipe,
+    measurement_unit = serializers.SlugRelatedField(IngredientInRecipe, 
                                                     many=True,read_only=True)
 
     class Meta:
@@ -220,7 +219,7 @@ class RecipeWriteSerializer(ModelSerializer):
     def create_ingredients_amounts(self, ingredients, recipe):
         for ingredient in ingredients:
             ing, _ = IngredientInRecipe.objects.get_or_create(
-                ingredient = Ingredient.objects.filter(id=ingredient['id']),
+                ingredient=Ingredient.objects.filter(id=ingredient['id']),
                 amount=ingredient['amount'],
             )
             recipe.ingredients.add(ing.id)

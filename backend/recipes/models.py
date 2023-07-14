@@ -6,7 +6,8 @@ from django.db.models import UniqueConstraint
 
 User = get_user_model()
 
-max_length=200
+max_length = 200
+
 
 class Tag(models.Model):
     """Модель тега."""
@@ -107,7 +108,7 @@ class Recipe(models.Model):
     )
     ingredients = models.ManyToManyField(
         IngredientInRecipe,
-        through = 'ingredient',
+        through='ingredient',
         related_name='recipes',
         verbose_name='Ингредиенты в рецепте'
     )
