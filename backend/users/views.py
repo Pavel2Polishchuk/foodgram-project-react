@@ -1,4 +1,4 @@
-from api.pagination import CustomPagination
+from api.pagination import LimitPageNumberPagination
 from api.serializers import CustomUserSerializer, SubscribeSerializer
 from django.contrib.auth import get_user_model
 from django.shortcuts import get_object_or_404
@@ -17,7 +17,7 @@ class CustomUserViewSet(UserViewSet):
     """Вьюсет для кастомной модели пользователя."""
     queryset = User.objects.all()
     serializer_class = CustomUserSerializer
-    pagination_class = CustomPagination
+    pagination_class = LimitPageNumberPagination
 
     @action(
         detail=True,

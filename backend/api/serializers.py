@@ -1,20 +1,18 @@
 from django.core.exceptions import BadRequest
-from djoser.serializers import UserCreateSerializer, UserSerializer
-from drf_extra_fields.fields import Base64ImageField
-from recipes.models import Ingredient, IngredientInRecipe, Recipe, Tag
-from rest_framework.exceptions import ValidationError
 from rest_framework import serializers
 from rest_framework import status
-from rest_framework.fields import SerializerMethodField
+from rest_framework.exceptions import ValidationError
+from rest_framework.fields import IntegerField, SerializerMethodField
 from rest_framework.relations import PrimaryKeyRelatedField
 from rest_framework.serializers import ModelSerializer, ReadOnlyField
+
+from djoser.serializers import UserCreateSerializer, UserSerializer
+from drf_extra_fields.fields import Base64ImageField
+
+from recipes.models import (Ingredient, IngredientInRecipe, Recipe, Tag)
 from users.models import Subscribe, User
 
-# По поводу сортировки: изначально разбил сортировку на группы,
-# но автоматические тесты на практикуме не проходит,
-# работает только в таком виде, по алфавиту
-
-
+from rest_framework import serializers
 class TagSerializer(ModelSerializer):
     class Meta:
         model = Tag
