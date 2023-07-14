@@ -21,6 +21,7 @@ class UsersAdmin(BaseAdminSettings):
     )
     list_display_links = ('id', 'username')
     search_fields = ('role', 'username')
+    list_filter = ('email', 'username')
 
 
 class SubscribeAdmin(admin.ModelAdmin):

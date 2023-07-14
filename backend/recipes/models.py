@@ -6,11 +6,12 @@ from django.db.models import UniqueConstraint
 
 User = get_user_model()
 
+max_length=200
 
 class Tag(models.Model):
     """Модель тега."""
     name = models.CharField(
-        max_length=200,
+        max_length,
         verbose_name='Название тега',
         unique=True
     )
@@ -21,7 +22,7 @@ class Tag(models.Model):
         verbose_name='Цвет в формате HEX'
     )
     slug = models.SlugField(
-        max_length=200,
+        max_length,
         verbose_name='Уникальный слаг',
         unique=True
     )
@@ -41,7 +42,7 @@ class Ingredient(models.Model):
         verbose_name='Название ингредиента',
     )
     measurement_unit = models.CharField(
-        max_length=200,
+        max_length,
         verbose_name='Единица измерения'
     )
 
@@ -74,7 +75,7 @@ class IngredientInRecipe(models.Model):
         default_related_name = 'ingridients_recipe'
         constraints = [
             UniqueConstraint(
-                fields=('ingredient', 'amount'),
+                fields=('amount'),
                 name='unique_ingredient_in_recipe'),
         ]
         verbose_name = 'Ингредиент в рецепте'
@@ -98,7 +99,6 @@ class Recipe(models.Model):
         db_index=True
     )
     image = models.ImageField(
-        blank=True,
         verbose_name='Изображение',
         upload_to='recipes/images'
     )
@@ -107,6 +107,7 @@ class Recipe(models.Model):
     )
     ingredients = models.ManyToManyField(
         IngredientInRecipe,
+        through = 'ingredient',
         related_name='recipes',
         verbose_name='Ингредиенты в рецепте'
     )
@@ -117,7 +118,7 @@ class Recipe(models.Model):
     )
     cooking_time = models.PositiveSmallIntegerField(
         validators=[
-            MinValueValidator(1, 'Минимальное значение - 1')
+            MinValueValidator(1, 'Минимальное значение: 1')
         ],
         verbose_name='Время приготовления, мин.'
     )

@@ -1,6 +1,9 @@
 from django.contrib.auth.models import AbstractUser
+from django.core.validators import validate_slug
 from django.db import models
 from django.db.models import UniqueConstraint
+
+max_length=150
 
 
 class UserRole:
@@ -16,18 +19,19 @@ class User(AbstractUser):
     """Модель пользователя."""
     username = models.CharField(
         'Имя пользователя',
-        max_length=150,
+        max_length,
         unique=True,
         null=True,
+        validators=[validate_slug],
     )
     first_name = models.CharField(
         'Имя',
-        max_length=150,
+        max_length,
         blank=True
     )
     last_name = models.CharField(
         'Фамилия',
-        max_length=150,
+        max_length,
         blank=True
     )
     email = models.EmailField(

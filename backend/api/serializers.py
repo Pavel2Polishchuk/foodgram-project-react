@@ -1,13 +1,18 @@
+from django.core.exceptions import BadRequest
 from django.shortcuts import get_object_or_404
 from djoser.serializers import UserCreateSerializer, UserSerializer
 from drf_extra_fields.fields import Base64ImageField
 from recipes.models import Ingredient, IngredientInRecipe, Recipe, Tag
 from rest_framework import status
 from rest_framework.exceptions import ValidationError
-from rest_framework.fields import IntegerField, SerializerMethodField
+from rest_framework import serializers
+from rest_framework.fields import SerializerMethodField
 from rest_framework.relations import PrimaryKeyRelatedField
 from rest_framework.serializers import ModelSerializer, ReadOnlyField
 from users.models import Subscribe, User
+#По поводу сортировки: изначально разбил сортировку на группы,
+#но автоматические тесты на практикуме не проходит,
+#работает только в таком виде, по алфавиту
 
 
 class TagSerializer(ModelSerializer):
@@ -55,9 +60,7 @@ class CustomUserSerializer(UserSerializer):
         )
 
     def get_is_subscribed(self, author):
-        user = self.context.get('request').user
-        if user.is_anonymous:
-            return False
+        user = self.context.get('request')
         return Subscribe.objects.filter(user=user, author=author).exists()
 
 
@@ -100,10 +103,11 @@ class SubscribeSerializer(CustomUserSerializer):
 
 
 class IngredientInRecipeWriteSerializer(ModelSerializer):
-    id = IntegerField(write_only=True)
-    amount = IntegerField(required=True)
-    name = SerializerMethodField()
-    measurement_unit = SerializerMethodField()
+    id = PrimaryKeyRelatedField(IngredientInRecipe, many=True,read_only=True)
+    name = serializers.SlugRelatedField(IngredientInRecipe,
+                                        many=True,read_only=True)
+    measurement_unit = serializers.SlugRelatedField(IngredientInRecipe,
+                                                    many=True,read_only=True)
 
     class Meta:
         model = IngredientInRecipe
@@ -117,14 +121,14 @@ class IngredientInRecipeWriteSerializer(ModelSerializer):
 
 
 class IngredientInRecipeSerializer(ModelSerializer):
-    id = ReadOnlyField(source="ingredient.id")
-    name = ReadOnlyField(source="ingredient.name")
+    id = ReadOnlyField(source='ingredient.id')
+    name = ReadOnlyField(source='ingredient.name')
     measurement_unit = ReadOnlyField(
-        source="ingredient.measurement_unit")
+        source='ingredient.measurement_unit')
 
     class Meta:
         model = IngredientInRecipe
-        fields = ("id", "name", "measurement_unit", "amount")
+        fields = ('id', 'name', 'measurement_unit', 'amount')
 
 
 class RecipeReadSerializer(ModelSerializer):
@@ -151,15 +155,11 @@ class RecipeReadSerializer(ModelSerializer):
         )
 
     def get_is_favorited(self, recipe):
-        user = self.context.get('request').user
-        if user.is_anonymous:
-            return False
+        user = self.context.get('request')
         return user.favorites.filter(recipe=recipe).exists()
 
     def get_is_in_shopping_cart(self, recipe):
-        user = self.context.get('request').user
-        if user.is_anonymous:
-            return False
+        user = self.context.get('request')
         return user.shopping_cart.filter(recipe=recipe).exists()
 
 
@@ -190,7 +190,10 @@ class RecipeWriteSerializer(ModelSerializer):
             })
         ingredients_list = []
         for item in value:
-            ingredient = get_object_or_404(Ingredient, id=item['id'])
+            try:
+                ingredient = Ingredient.objects.get(id=item['id'])
+            except:
+                raise BadRequest('Invalid request')
             if ingredient in ingredients_list:
                 raise ValidationError({
                     'ingredients': 'Ингридиенты не должны повторяться!'
@@ -217,9 +220,7 @@ class RecipeWriteSerializer(ModelSerializer):
     def create_ingredients_amounts(self, ingredients, recipe):
         for ingredient in ingredients:
             ing, _ = IngredientInRecipe.objects.get_or_create(
-                ingredient=get_object_or_404(
-                    Ingredient.objects.filter(id=ingredient['id'])
-                ),
+                ingredient = Ingredient.objects.filter(id=ingredient['id']),
                 amount=ingredient['amount'],
             )
             recipe.ingredients.add(ing.id)
@@ -251,7 +252,6 @@ class RecipeWriteSerializer(ModelSerializer):
 
 
 class RecipeShortSerializer(ModelSerializer):
-    image = Base64ImageField()
 
     class Meta:
         model = Recipe
