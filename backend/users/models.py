@@ -3,7 +3,7 @@ from django.core.validators import validate_slug
 from django.db import models
 from django.db.models import UniqueConstraint
 
-max_length=150
+max_length = 150
 
 
 class UserRole:

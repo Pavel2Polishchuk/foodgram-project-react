@@ -3,12 +3,13 @@ from djoser.serializers import UserCreateSerializer, UserSerializer
 from drf_extra_fields.fields import Base64ImageField
 from recipes.models import Ingredient, IngredientInRecipe, Recipe, Tag
 from rest_framework import status
-from rest_framework.exceptions import ValidationError
 from rest_framework import serializers
+from rest_framework.exceptions import ValidationError
 from rest_framework.fields import SerializerMethodField
 from rest_framework.relations import PrimaryKeyRelatedField
 from rest_framework.serializers import ModelSerializer, ReadOnlyField
 from users.models import Subscribe, User
+
 # По поводу сортировки: изначально разбил сортировку на группы,
 # но автоматические тесты на практикуме не проходит,
 # работает только в таком виде, по алфавиту
@@ -103,10 +104,10 @@ class SubscribeSerializer(CustomUserSerializer):
 
 class IngredientInRecipeWriteSerializer(ModelSerializer):
     id = PrimaryKeyRelatedField(IngredientInRecipe, many=True, read_only=True)
-    name = serializers.SlugRelatedField(IngredientInRecipe, 
-                                        many=True,read_only=True)
-    measurement_unit = serializers.SlugRelatedField(IngredientInRecipe, 
-                                                    many=True,read_only=True)
+    name = serializers.SlugRelatedField(IngredientInRecipe,
+                                        many=True, read_only=True)
+    measurement_unit = serializers.SlugRelatedField(IngredientInRecipe,
+                                                    many=True, read_only=True)
 
     class Meta:
         model = IngredientInRecipe
@@ -191,7 +192,7 @@ class RecipeWriteSerializer(ModelSerializer):
         for item in value:
             try:
                 ingredient = Ingredient.objects.get(id=item['id'])
-            except:
+            except ingredient:
                 raise BadRequest('Invalid request')
             if ingredient in ingredients_list:
                 raise ValidationError({
