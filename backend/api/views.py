@@ -1,4 +1,5 @@
 from datetime import datetime
+
 from django.db.models import Sum
 from django.http import HttpResponse
 from django.shortcuts import get_object_or_404
@@ -10,14 +11,14 @@ from rest_framework.response import Response
 from rest_framework.status import HTTP_400_BAD_REQUEST
 from rest_framework.viewsets import ModelViewSet, ReadOnlyModelViewSet
 
-from recipes.models import (Favorite, Ingredient, IngredientInRecipe, Recipe,
-                            ShoppingCart, Tag)
-from .filters import IngredientFilter, RecipeFilter
-from .pagination import LimitPageNumberPagination
-from .permissions import IsAdminOrReadOnly, IsAdminAuthorOrReadOnly
-from .serializers import (IngredientSerializer, RecipeReadSerializer,
+from api.filters import IngredientFilter, RecipeFilter
+from api.pagination import LimitPageNumberPagination
+from api.permissions import IsAdminOrReadOnly, IsAdminAuthorOrReadOnly
+from api.serializers import (IngredientSerializer, RecipeReadSerializer,
                           RecipeShortSerializer, RecipeWriteSerializer,
                           TagSerializer)
+from recipes.models import (Favorite, Ingredient, IngredientInRecipe, Recipe,
+                            ShoppingCart, Tag)
 
 
 class TagViewSet(ReadOnlyModelViewSet):
