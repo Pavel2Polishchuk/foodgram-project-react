@@ -3,7 +3,7 @@ from django.core.validators import validate_slug
 from django.db import models
 from django.db.models import UniqueConstraint
 
-max_length = 150
+MAX_LENGTH_NAME = 150
 
 
 class UserRole:
@@ -19,19 +19,19 @@ class User(AbstractUser):
     """Модель пользователя."""
     username = models.CharField(
         'Имя пользователя',
-        max_length,
+        max_length=MAX_LENGTH_NAME,
         unique=True,
         null=True,
         validators=[validate_slug],
     )
     first_name = models.CharField(
         'Имя',
-        max_length,
+        max_length=MAX_LENGTH_NAME,
         blank=True
     )
     last_name = models.CharField(
         'Фамилия',
-        max_length,
+        max_length=MAX_LENGTH_NAME,
         blank=True
     )
     email = models.EmailField(
