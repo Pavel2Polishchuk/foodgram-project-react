@@ -76,7 +76,7 @@ class IngredientInRecipe(models.Model):
         default_related_name = 'ingridients_recipe'
         constraints = [
             UniqueConstraint(
-                fields=('ingredient', 'amount'), 
+                fields=('ingredient', 'amount'),
                 name='unique_ingredient_in_recipe'),
         ]
         verbose_name = 'Ингредиент в рецепте'
