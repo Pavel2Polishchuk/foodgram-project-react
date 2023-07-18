@@ -1,9 +1,10 @@
 from django.core.exceptions import BadRequest
+from django.shortcuts import get_object_or_404
 from djoser.serializers import UserCreateSerializer, UserSerializer
 from drf_extra_fields.fields import Base64ImageField
 from rest_framework import serializers, status
 from rest_framework.exceptions import ValidationError
-from rest_framework.fields import SerializerMethodField
+from rest_framework.fields import IntegerField, SerializerMethodField
 from rest_framework.relations import PrimaryKeyRelatedField
 from rest_framework.serializers import ModelSerializer, ReadOnlyField
 
@@ -56,7 +57,7 @@ class CustomUserSerializer(UserSerializer):
         )
 
     def get_is_subscribed(self, author):
-        user = self.context.get('request')
+        user = self.context.get('request').user
         return Subscribe.objects.filter(user=user, author=author).exists()
 
 
@@ -99,11 +100,13 @@ class SubscribeSerializer(CustomUserSerializer):
 
 
 class IngredientInRecipeWriteSerializer(ModelSerializer):
-    id = PrimaryKeyRelatedField(IngredientInRecipe, many=True, read_only=True)
-    name = serializers.SlugRelatedField(IngredientInRecipe,
-                                        many=True, read_only=True)
-    measurement_unit = serializers.SlugRelatedField(IngredientInRecipe,
-                                                    many=True, read_only=True)
+    # id = serializers.PrimaryKeyRelatedField(
+    #    source='Ingredient.id',
+    #    queryset=Ingredient.objects.all()
+    # )
+    id = IntegerField(write_only=True)  
+    name = serializers.StringRelatedField(source='ingredient.name')
+    measurement_unit = serializers.StringRelatedField(source='ingredient.measurement_unit')
 
     class Meta:
         model = IngredientInRecipe
@@ -151,11 +154,11 @@ class RecipeReadSerializer(ModelSerializer):
         )
 
     def get_is_favorited(self, recipe):
-        user = self.context.get('request')
+        user = self.context.get('request').user
         return user.favorites.filter(recipe=recipe).exists()
 
     def get_is_in_shopping_cart(self, recipe):
-        user = self.context.get('request')
+        user = self.context.get('request').user
         return user.shopping_cart.filter(recipe=recipe).exists()
 
 
@@ -216,7 +219,9 @@ class RecipeWriteSerializer(ModelSerializer):
     def create_ingredients_amounts(self, ingredients, recipe):
         for ingredient in ingredients:
             ing, _ = IngredientInRecipe.objects.get_or_create(
-                ingredient=Ingredient.objects.filter(id=ingredient['id']),
+                ingredient=get_object_or_404(
+                    Ingredient.objects.filter(id=ingredient['id'])
+                ),
                 amount=ingredient['amount'],
             )
             recipe.ingredients.add(ing.id)

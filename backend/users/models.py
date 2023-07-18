@@ -1,7 +1,10 @@
 from django.contrib.auth.models import AbstractUser
+from django.contrib.auth.validators import UnicodeUsernameValidator
 from django.core.validators import validate_slug
 from django.db import models
 from django.db.models import UniqueConstraint
+
+from .validators import username_validator
 
 MAX_LENGTH_NAME = 150
 
@@ -21,8 +24,8 @@ class User(AbstractUser):
         'Имя пользователя',
         max_length=MAX_LENGTH_NAME,
         unique=True,
+        validators=(username_validator,),
         null=True,
-        validators=[validate_slug],
     )
     first_name = models.CharField(
         'Имя',
