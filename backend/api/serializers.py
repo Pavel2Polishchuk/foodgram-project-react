@@ -104,9 +104,11 @@ class IngredientInRecipeWriteSerializer(ModelSerializer):
     #    source='Ingredient.id',
     #    queryset=Ingredient.objects.all()
     # )
-    id = IntegerField(write_only=True)  
+    id = IntegerField(write_only=True)
     name = serializers.StringRelatedField(source='ingredient.name')
-    measurement_unit = serializers.StringRelatedField(source='ingredient.measurement_unit')
+    measurement_unit = serializers.StringRelatedField(
+        source='ingredient.measurement_unit'
+    )
 
     class Meta:
         model = IngredientInRecipe
