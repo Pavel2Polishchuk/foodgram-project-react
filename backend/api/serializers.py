@@ -8,8 +8,12 @@ from rest_framework.fields import IntegerField, SerializerMethodField
 from rest_framework.relations import PrimaryKeyRelatedField
 from rest_framework.serializers import ModelSerializer, ReadOnlyField
 
-from recipes.models import Ingredient, IngredientInRecipe, Recipe, Tag
+from recipes.models import (Favorite, Ingredient, IngredientInRecipe, Recipe,
+                            ShoppingCart, Tag)
 from users.models import Subscribe, User
+
+MIN_VALUE = 1
+MAX_VALUE = 32000
 
 
 class TagSerializer(ModelSerializer):
@@ -56,9 +60,11 @@ class CustomUserSerializer(UserSerializer):
             'is_subscribed',
         )
 
-    def get_is_subscribed(self, author):
-        user = self.context.get('request').user
-        return Subscribe.objects.filter(user=user, author=author).exists()
+    def get_is_subscribed(self, obj):
+        request = self.context.get('request')
+        if request.user.is_anonymous:
+            return False
+        return obj.subscribing.filter(user=request.user).exists()
 
 
 class SubscribeSerializer(CustomUserSerializer):
@@ -114,6 +120,17 @@ class IngredientInRecipeWriteSerializer(ModelSerializer):
         model = IngredientInRecipe
         fields = ('id', 'amount', 'name', 'measurement_unit')
 
+    def validate_amount(self, value):
+        if value < MIN_VALUE:
+            raise serializers.ValidationError(
+                'Количество ингредиента должно быть положительным!'
+            )
+        if value > MAX_VALUE:
+            raise serializers.ValidationError(
+                'Количество ингредиента должно быть меньше 32000!'
+            )
+        return value
+
     def get_measurement_unit(self, ingredient):
         return ingredient.ingredient.measurement_unit
 
@@ -157,11 +174,17 @@ class RecipeReadSerializer(ModelSerializer):
 
     def get_is_favorited(self, recipe):
         user = self.context.get('request').user
-        return user.favorites.filter(recipe=recipe).exists()
+        return (
+            user.is_authenticated
+            and Favorite.objects.filter(user=user, recipe=recipe).exists()
+        )
 
     def get_is_in_shopping_cart(self, recipe):
         user = self.context.get('request').user
-        return user.shopping_cart.filter(recipe=recipe).exists()
+        return (
+            user.is_authenticated
+            and ShoppingCart.objects.filter(user=user, recipe=recipe).exists()
+        )
 
 
 class RecipeWriteSerializer(ModelSerializer):
@@ -191,17 +214,10 @@ class RecipeWriteSerializer(ModelSerializer):
             })
         ingredients_list = []
         for item in value:
-            try:
-                ingredient = Ingredient.objects.get(id=item['id'])
-            except ingredient:
-                raise BadRequest('Invalid request')
+            ingredient = Ingredient.objects.get(id=item['id'])
             if ingredient in ingredients_list:
                 raise ValidationError({
                     'ingredients': 'Ингридиенты не должны повторяться!'
-                })
-            if int(item['amount']) <= 0:
-                raise ValidationError({
-                    'amount': 'Количество ингредиента должно быть больше 0!'
                 })
             ingredients_list.append(ingredient)
         return value
@@ -219,19 +235,19 @@ class RecipeWriteSerializer(ModelSerializer):
         return value
 
     def create_ingredients_amounts(self, ingredients, recipe):
-        for ingredient in ingredients:
-            ing, _ = IngredientInRecipe.objects.get_or_create(
-                ingredient=get_object_or_404(
-                    Ingredient.objects.filter(id=ingredient['id'])
-                ),
-                amount=ingredient['amount'],
-            )
-            recipe.ingredients.add(ing.id)
+        IngredientInRecipe.objects.bulk_create(
+            [IngredientInRecipe(
+                ingredient=Ingredient.objects.get(id=ingredient['id']),
+                recipe=recipe,
+                amount=ingredient['amount']
+            ) for ingredient in ingredients]
+        )
 
     def create(self, validated_data):
+        author = self.context.get('request').user
         tags = validated_data.pop('tags')
         ingredients = validated_data.pop('ingredients')
-        recipe = Recipe.objects.create(**validated_data)
+        recipe = Recipe.objects.create(author=author, **validated_data)
         recipe.tags.set(tags)
         self.create_ingredients_amounts(recipe=recipe,
                                         ingredients=ingredients)
