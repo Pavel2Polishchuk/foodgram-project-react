@@ -8,7 +8,7 @@ from django_filters.rest_framework import DjangoFilterBackend
 from djoser.views import UserViewSet
 from rest_framework import status
 from rest_framework.decorators import action
-from rest_framework.permissions import SAFE_METHODS, IsAuthenticated
+from rest_framework.permissions import SAFE_METHODS, AllowAny, IsAuthenticated
 from rest_framework.response import Response
 from rest_framework.status import HTTP_400_BAD_REQUEST
 from rest_framework.viewsets import ModelViewSet, ReadOnlyModelViewSet
@@ -32,6 +32,7 @@ class CustomUserViewSet(UserViewSet):
     queryset = User.objects.all()
     serializer_class = CustomUserSerializer
     pagination_class = LimitPageNumberPagination
+    permission_classes = [AllowAny]
 
     @action(
         detail=True,
@@ -51,6 +52,12 @@ class CustomUserViewSet(UserViewSet):
             serializer.is_valid(raise_exception=True)
             Subscribe.objects.create(user=user, author=author)
             return Response(serializer.data, status=status.HTTP_201_CREATED)
+        if request.method == 'DELETE':
+            subscription = get_object_or_404(Subscribe,
+                                             user=user,
+                                             author=author)
+            subscription.delete()
+            return Response(status=status.HTTP_204_NO_CONTENT)
         return Response(status=status.HTTP_405_METHOD_NOT_ALLOWED)
 
     @action(
@@ -148,19 +155,18 @@ class RecipeViewSet(ModelViewSet):
     def download_shopping_cart(self, request):
         """Скачать список покупок."""
         user = request.user
+        ingredients = IngredientInRecipe.objects.filter(
+            recipe__shopping_cart__user=request.user
+        ).values(
+            'ingredient__name',
+            'ingredient__measurement_unit'
+        ).annotate(amount=Sum('amount'))
         if not user.shopping_cart.exists():
             return Response(status=HTTP_400_BAD_REQUEST)
-        return data_generation()
+        return data_generation(user, ingredients)
 
 
-def data_generation(request):
-    user = request.user
-    ingredients = IngredientInRecipe.objects.filter(
-        recipe__shopping_cart__user=request.user
-    ).values(
-        'ingredient__name',
-        'ingredient__measurement_unit'
-    ).annotate(amount=Sum('amount'))
+def data_generation(user, ingredients):
     today = datetime.today()
     shopping_list = (
         f'Список покупок для: {user.get_full_name()}\n\n'
