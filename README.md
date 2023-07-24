@@ -37,17 +37,11 @@ curl -L "https://github.com/docker/compose/releases/download/1.29.2/docker-compo
 chmod +x /usr/local/bin/docker-compose
 ```
 
-- Отредактируйте конфигурацию сервера NGNIX:
-```sh
-Локально измените файл ..infra/nginx.conf - замените данные в строке server_name на IP-адрес удаленного сервера
-```
-
 - Скопируйте файлы docker-compose.yml и nginx.conf из директории ../infra/ на удаленный сервер:
 ```sh
 scp docker-compose.yml <username>@<host>:/home/<username>/docker-compose.yaml
 scp nginx.conf <username>@<host>:/home/<username>/nginx.conf
 ```
-- Создайте переменные окружения (указаны в файле ../infra/env.example) и добавьте их в Secrets GitHub Actions
 
 - Установите и активируйте виртуальное окружение (для Windows):
 
@@ -98,17 +92,6 @@ docker-compose down -v
 
 ```sh
 $ git clone https://github.com/Pavel2Polishchuk/foodgram-project-react.git
-```
-
-- В папке ../infra/ переименуйте файл example.env в .env и заполните своими данными:
-```
-DB_ENGINE=django.db.backends.postgresql
-DB_NAME=postgres
-POSTGRES_USER=postgres
-POSTGRES_PASSWORD=postgres
-DB_HOST=db
-DB_PORT=5432
-SECRET_KEY=<...> # секретный ключ django-проекта из settings.py
 ```
 
 - Создайте и запустите контейнеры Docker (по инструкции выше).
