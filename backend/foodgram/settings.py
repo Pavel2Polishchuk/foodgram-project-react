@@ -12,8 +12,8 @@ SECRET_KEY = os.getenv('SECRET_KEY', default='fweff')
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
 
-ALLOWED_HOSTS = os.getenv('HOSTS', default='127.0.0.1, backend').split(', ')
-
+# ALLOWED_HOSTS = os.getenv('HOSTS', default='127.0.0.1, backend').split(', ')
+ALLOWED_HOSTS = ['158.160.68.197', 'localhost', '127.0.0.1', 'project333.ddns.net', 'backend']
 
 # Application definition
 
@@ -75,7 +75,7 @@ DATABASES = {
         'USER': os.getenv('POSTGRES_USER', 'django'),
         'PASSWORD': os.getenv('POSTGRES_PASSWORD', ''),
         'HOST': os.getenv('DB_HOST', ''),
-        'PORT': os.getenv('DB_PORT', 5432)
+        'PORT': os.getenv('DB_PORT', 5433)
     }
 }
 
