@@ -417,6 +417,7 @@ POST /api/recipes/
 
 ```sh
 https://158.160.68.197/admin
+@mail: admin@list.ru
 login: admin
 pass: admin123
 ```
