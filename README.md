@@ -416,7 +416,7 @@ POST /api/recipes/
 Доступ в админ-панель:
 
 ```sh
-http://158.160.68.197/admin
+https://158.160.68.197/admin
 login: admin
 pass: admin123
 ```
